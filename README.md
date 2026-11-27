@@ -254,7 +254,8 @@ src/modules/tuntap/       TUN tunnel
 test/                     Test scripts and the packet-loss shim
 doc/                      Doxygen configuration, main page, Xfig figures (img/ = PNG exports)
 Makefile                  Single build file
-LICENCE.TXT               Licence notice (GNU GPL v3 or later)
+COPYING                   Full text of the GNU General Public License v3
+LICENCE.TXT               Licence notice and authors (GNU GPL v3 or later)
 ```
 
 ---
@@ -577,8 +578,8 @@ This program is free software: you can redistribute it and/or modify it under
 the terms of the **GNU General Public License** as published by the Free
 Software Foundation, either version 3 of the License, or any later version. It
 is distributed in the hope that it will be useful, but **without any
-warranty**; see the notice in [`LICENCE.TXT`](LICENCE.TXT) and the full text
-of the GNU GPL at <http://www.gnu.org/licenses/>.
+warranty**; see the notice in [`LICENCE.TXT`](LICENCE.TXT), the full text
+in [`COPYING`](COPYING) or at <https://www.gnu.org/licenses/>.
 
 `src/tetrys_core/fec.c` is derived from the `fec.c` library of Luigi Rizzo and
 keeps its original copyright notice and its BSD-style conditions, which
