@@ -1,0 +1,88 @@
+/**
+ * \mainpage Tetrys
+ *
+ * Tetrys is an on-the-fly erasure-coding protocol: the sender keeps an
+ * encoding window of the data packets that are not acknowledged yet and sends
+ * repair packets that are random linear combinations of that window, over
+ * GF(2^8). The receiver subtracts the data it already has from the repairs and
+ * inverts the remaining small system to rebuild the lost packets.
+ *
+ * This page explains the figures of the `doc/` directory (Xfig sources
+ * `doc/*.fig`, PNG exports in `doc/img`, regenerated with `make figs`) and
+ * maps each step of the figures to the functions of the library.
+ *
+ * \section fig_actors Actors and packet types
+ *
+ * \image html TetrysDoc.png "The four actors and the packets they exchange"
+ *
+ * \image html tetrysLegend.png "Legend of the figures"
+ *
+ * | Name | Constant | Meaning |
+ * |---|---|---|
+ * | DS | ::PORT_DS | Application packet, SenderApp to Tetrys sender |
+ * | DR | ::PORT_DR | Data delivered by the Tetrys receiver to ReceiverApp |
+ * | AR | ::PORT_AR | Application packet, ReceiverApp to Tetrys receiver |
+ * | AS | ::PORT_AS | Packet delivered by the Tetrys sender to SenderApp (payload of a received TAP) |
+ * | TD | ::PORT_TD | Tetrys data packet, sender to receiver |
+ * | TR | ::PORT_TR | Tetrys repair packet, sender to receiver |
+ * | TA | ::PORT_TA | ACK-only packet, receiver to sender, sent when the `ack_freq` timer expires |
+ * | TAP | ::PORT_TAP | An AR packet wrapped with a piggybacked Tetrys ACK, receiver to sender |
+ * | TAD, TAR | ::PORT_TAD, ::PORT_TAR | Data / repair packet with a piggybacked ACK, used when both sides send data (role 0); the figures show the ACK as a separate TAP |
+ * | D | | A data segment stored in a buffer |
+ * | R | | A repair (linear combination) stored in the repair buffer |
+ *
+ * \section fig_sender Sender side
+ *
+ * \image html tetrysBufferSender.png "Sender: buffers and procedures"
+ *
+ * \section fig_receiver Receiver side
+ *
+ * \image html tetrysBufferReceiver.png "Receiver: buffers and procedures"
+ *
+ * \section fig_both Sender and receiver in one process
+ *
+ * The complete figure merges both sides; the step numbers are the ones quoted
+ * in the comments of the main loops (`tetrys_step_once()`, called from `tetrys_main_run()` in both modules).
+ *
+ * \image html tetrysBufferSenderReceiver.png "Sender and receiver: buffers and procedures"
+ *
+ * \section fig_steps Steps of the figure and their implementation
+ *
+ * | Step | What happens | Implementation |
+ * |---|---|---|
+ * | 1 | Wait for data from the network (pselect) | wait_for_input(), harvest_input() and the registered input handlers |
+ * | 2 | Treat an ACK at once: remove from the SEBuffer the packets older than the acknowledged point; for a TAP, queue its payload as an AS | scan_tetrys_ack(), harvest_ack_packet() |
+ * | 3 | Queue a TD / TR in the TIBuffer | harvest_tetrys_packet() |
+ * | 4 | Pop the oldest packet of the TIBuffer | treat_ti_buffer() |
+ * | 5, 5.1, 5.2 | A TD is stored in the RDBuffer (5.1) and delivered, in order or not (5.2) | ti_treat_data(), send_dat_in_order() |
+ * | 6 | A TR is stored in the RRBuffer | ti_treat_repair() |
+ * | 7 | If the repairs allow it, decode, then go back to 5.1 and 5.2 | try_to_decode(), check_if_can_decode(), decode_losses(), build_matrix_and_invert() |
+ * | 8, 8.1 | Wait for application packets (AR or DS) and queue them in the DIBuffer | harvest_app_data() |
+ * | 9, 10 | Pop the DIBuffer; an AR gets a Tetrys ACK header and is queued as a TAP | treat_di_buffer() |
+ * | 11, 11.1, 11.2 | A DS becomes a TD queued in the OBuffer (11.1) and is added to the encoding window (11.2) | treat_di_buffer(), di_encode_and_queue() |
+ * | 12 | `ack_freq` timer: build a TA and queue it | tetrys_handle_alarm(), send_ack_only() |
+ * | 13 | Build a repair from the whole encoding window and queue it | send_repair(), tet_encode() |
+ * | 14 | `rep_freq` timer: go to 13 if packets are still unacknowledged | tetrys_handle_alarm(), send_redundancy() |
+ * | 15 | Pop the OBuffer | treat_o_buffer() |
+ * | 16 | DR / AS are handed to the application (module dependent) | output handlers (e.g. output_handler_tun()) |
+ * | 17 | TD, TR, TA, TAP are sent on the network (module dependent) | output handlers (e.g. output_handler_udp()) |
+ *
+ * \section fig_names Names in the figures and in the code
+ *
+ * | In the figures | In the code |
+ * |---|---|
+ * | TOBuffer (sender), DOBuffer (receiver) | the single `OBuffer` of `struct TETRYS` |
+ * | Timer redundancyFreq | `sig_AckRed->rep_freq` |
+ * | Timer X = freqAck | `sig_AckRed->ack_freq` |
+ * | SEBuffer, DIBuffer, TIBuffer, RDBuffer, RRBuffer | identical names |
+ *
+ * The figures show the sliding-window mode (`fecMode = 0`). The block-FEC mode
+ * (`fecMode = 1`) is not drawn.
+ *
+ * \section fig_more See also
+ *
+ * - the `README.md` at the root of the repository (build, options, modules,
+ *   tests, how to cite the Tetrys paper);
+ * - ::PDU and ::TETRYS in common_struct_def.h for the packet header and the
+ *   protocol state.
+ */

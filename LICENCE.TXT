@@ -1,0 +1,27 @@
+/* GNU GENERAL PUBLIC LICENSE
+ *
+ * Copyright (C) 2011 Jerome Lacan, Emmanuel Lochin, Pierre-Ugo Tournoux, 2011 ISAE
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms 
+ * of the GNU General Public License as published by the Free Software Foundation, either version 
+ * 3 of the License, or any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * This code has been developped at the ISAE (Institut Superieur de l'Aeronautique et de l'Espace) 
+ * a french space and aeronautic institute based in Toulouse, France in the context of a DMIA 
+ * project (Department of Mathematics, Computer Sciences and Control Theory).
+ * 
+ * This code has been developped by:
+ * 
+ * Jerome Lacan - jerome.lacan@isae-supaero.fr
+ * Emmanuel Lochin - emmanuel.lochin@enac.fr
+ * Pierre-Ugo Tournoux - pierre-ugo.tournoux@univ-reunion.fr 
+ *
+ * Copyright ISAE 2011
+ */
